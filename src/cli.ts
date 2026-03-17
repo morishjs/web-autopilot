@@ -606,6 +606,7 @@ Usage:
   web-autopilot [--port PORT] [--match KEYWORD] <command> [args...]
 
 Commands:
+  init                        Create docs/ui-nav-index.yaml from template
   navigate <keyword|url>      Navigate (auto nav-index lookup)
   extract [keyword]           Extract structured data via nav-index selectors
   action <block> [--answers]  Execute nav-index action sequence
@@ -666,6 +667,21 @@ try {
     case 'list': case 'pages':
       await cmdList();
       break;
+    case 'init': {
+      const { existsSync, mkdirSync, copyFileSync } = await import('fs');
+      const targetDir = resolve(process.cwd(), 'docs');
+      const targetPath = resolve(targetDir, 'ui-nav-index.yaml');
+      if (existsSync(targetPath)) {
+        console.log(`nav-index already exists: ${targetPath}`);
+      } else {
+        const examplePath = resolve(import.meta.dirname ?? '.', '..', 'examples', 'nav-index.example.yaml');
+        if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
+        copyFileSync(examplePath, targetPath);
+        console.log(`Created nav-index: ${targetPath}`);
+        console.log('Edit this file to add your pages, selectors, and actions.');
+      }
+      break;
+    }
     default:
       console.error(`Unknown command: ${command}`);
       process.exit(1);
