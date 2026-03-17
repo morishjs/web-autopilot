@@ -1,0 +1,71 @@
+# UI Navigation Index
+# Page-level URL, selectors, and action definitions.
+# web-autopilot reads this file to extract structured data from pages.
+#
+# Default location: docs/ui-nav-index.yaml
+# Override with: --nav-index <path> or NAV_INDEX_PATH env var
+
+# ============================================================
+# Example: Basic selectors
+# ============================================================
+
+homepage:
+  url: https://example.com
+  selectors:
+    title: h1
+    description: .hero-description
+    navLinks: nav a
+
+# ============================================================
+# Example: URL with wildcards and path params
+# ============================================================
+
+user-profile:
+  url: https://example.com/users/:id/profile
+  selectors:
+    name: .profile-name
+    bio: .profile-bio
+    avatar: .profile-avatar img
+
+# ============================================================
+# Example: iframe-based page (use eval instead of selectors)
+# ============================================================
+
+embedded-content:
+  url: https://example.com/embedded/*
+  eval: "document.querySelector('iframe#content')?.contentDocument?.body?.innerText"
+
+# ============================================================
+# Example: API endpoint for bulk data
+# ============================================================
+
+data-list:
+  url: https://example.com/data?*
+  selectors:
+    rows: table tbody tr
+  api:
+    endpoint: https://api.example.com/data
+    params: { sort: LATEST, limit: 100 }
+    pagination: nextToken
+    auth: browser-session
+
+# ============================================================
+# Example: Multi-step action with answers
+# ============================================================
+
+survey-form:
+  url: https://example.com/survey/*
+  selectors:
+    title: h1
+    body: .survey-content
+  actions:
+    - click_text: "Start Survey"
+    - wait: 1500
+    - select_radios: "[role=radio]"
+    - click_selector: "[role=checkbox]"
+    - wait: 500
+    - click_text: "Submit"
+  best_answers:
+    - "Strongly agree"
+    - "Very satisfied"
+    - "Excellent"
