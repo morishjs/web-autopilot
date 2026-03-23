@@ -1,0 +1,3 @@
+skills/web-auto/patterns/*
+!skills/web-auto/patterns/.gitkeep
+docs/ui-nav-index.yaml
