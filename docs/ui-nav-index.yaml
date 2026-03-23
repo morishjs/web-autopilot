@@ -48,3 +48,27 @@
 # iframe-viewer:
 #   url: https://viewer.example.com/*
 #   eval: "document.querySelector('iframe#mainFrame')?.contentDocument?.body?.innerText"
+
+# ============================================================
+# Notion 페이지
+# ============================================================
+
+notion-page:
+  url: https://www.notion.so/*
+  selectors:
+    title: ".notion-page-block .notranslate"
+    content: ".notion-page-content"
+    properties: ".notion-collection_view-block"
+
+# ============================================================
+# Experdy - 예약 캘린더
+# ============================================================
+
+# React SPA (Vite + TanStack Query). API는 /v2/ 접두사.
+# 가상스크롤 없음. 캘린더는 시간축 기반 그리드.
+# 예약 블록 클릭 → 사이드 패널 열림. 수정 버튼 → 예약 수정 모달.
+experdy-reservation:
+  url: https://dev.experdy.com/reservation*
+  api:
+    stay-calendar: https://dev.experdy.com/api/v2/stay/calendar/{date}
+    update-reservation: https://dev.experdy.com/api/v2/reservations/{reservationId}

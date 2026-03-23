@@ -1,34 +1,26 @@
 {
-  "name": "web-autopilot",
+  "name": "web-auto",
   "version": "0.1.0",
-  "description": "CLI browser automation tool via Chrome DevTools Protocol — navigate, extract, click without screenshots",
+  "description": "Browser automation CLI with nav-index driven extraction for Claude Code",
   "type": "module",
   "bin": {
-    "web-autopilot": "./src/cli.ts"
+    "web-auto": "./src/cli.ts"
   },
   "scripts": {
     "start": "bun src/cli.ts"
   },
   "files": [
-    "src"
+    "src/",
+    "hooks/",
+    "skills/",
+    "examples/"
   ],
   "keywords": [
-    "browser",
-    "automation",
+    "browser-automation",
     "cdp",
-    "chrome-devtools-protocol",
-    "cli",
-    "scraping",
-    "extract",
-    "bun"
+    "chrome-devtools",
+    "claude-code",
+    "nav-index"
   ],
-  "author": "morishjs",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/morishjs/web-autopilot.git"
-  },
-  "devDependencies": {
-    "bun-types": "^1.2.0"
-  }
+  "license": "MIT"
 }
