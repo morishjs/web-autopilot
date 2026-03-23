@@ -9,7 +9,7 @@ description: >
 
 # Web Autopilot
 
-`bun $MEVOPS_ROOT/scripts/browser.ts` CLI로 브라우저를 자동화합니다.
+`bun ~/claude-plugins/web-auto/src/browser.ts` CLI로 브라우저를 자동화합니다.
 MCP chrome-devtools tool 대신 CDP WebSocket 직접 통신. 모든 프로젝트에서 사용 가능.
 
 ## 목표
