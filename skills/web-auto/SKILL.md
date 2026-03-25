@@ -14,14 +14,13 @@ MCP chrome-devtools tool 대신 CDP WebSocket 직접 통신. 모든 프로젝트
 
 ## 목표
 
-nav-index에 등록된 페이지에서 안정적으로 데이터를 추출하고, 미등록 페이지를 발견하면 nav-index를 확장하여 재사용 가능하게 만든다.
+사이트별 patterns 파일의 경험적 지식(API, 셀렉터, gotcha, 워크플로우)을 축적하여, 반복 작업 시 탐색 없이 즉시 자동화할 수 있게 만든다.
 
 ## 핵심 동작
 
 | 명령 | 용도 |
 |------|------|
-| `navigate` | 페이지 이동 + nav-index 자동 조회 → 컨텍스트 제공 |
-| `extract` | nav-index 셀렉터로 구조화된 데이터 추출 (스크린샷 불필요) |
+| `navigate` | 페이지 이동 |
 | `eval` | JS 실행 — API fetch, iframe 접근, DOM 탐색 |
 | `click` | 텍스트 기반 UI 클릭 |
 | `snapshot` / `screenshot` | 페이지 상태 확인 |
@@ -29,23 +28,45 @@ nav-index에 등록된 페이지에서 안정적으로 데이터를 추출하고
 ## Gotchas (반드시 확인)
 
 1. **`--user-data-dir` 누락 = 세션 소실**: Chrome을 CDP 모드로 재시작할 때 `--user-data-dir="$HOME/.chrome-dev-profile"` 없으면 로그인 세션이 전부 날아감
-2. **iframe 사이트는 extract 불가**: iframe 안에 콘텐츠가 있는 사이트는 CSS 셀렉터가 작동 안 함. `eval`로 iframe contentDocument 접근 필수
-3. **가상스크롤 = DOM 불완전**: 가상스크롤 페이지는 DOM에 화면 내 항목만 존재. 전수 데이터는 API로 수집해야 정확
-4. **SPA 페이지 전환**: SPA에서 다른 페이지로 전환할 때 내부 라우팅이 안 되면 `window.location.href` 직접 변경 필요
-5. **extract/eval 미등록 차단**: nav-index에 없는 페이지에서 extract/snapshot/eval 실행하면 exit code 2로 차단. navigate는 경고만 출력하고 진행
-6. **bot detection 주의**: 일부 사이트는 fetch/XHR 직접 호출 시 봇으로 차단. nav-index 주석에 API 사용 가능 여부 확인
+2. **iframe 사이트는 셀렉터 불가**: `eval`로 iframe contentDocument 접근 필수
+3. **가상스크롤 = DOM 불완전**: 전수 데이터는 API로 수집해야 정확
+4. **SPA 페이지 전환**: 내부 라우팅이 안 되면 `window.location.href` 직접 변경 필요
+5. **bot detection 주의**: 일부 사이트는 fetch/XHR 직접 호출 시 봇으로 차단
 
 ## 사이트별 패턴 (`patterns/`)
 
-사이트별 경험적 지식(gotcha, 인증 방법, API 호출 패턴, 워크플로우)을 `patterns/{site}.md`에 관리한다.
-nav-index가 "어떻게 접근하는가"(URL→셀렉터 매핑)라면, patterns는 "무엇을 주의해야 하는가"(경험적 지식)이다.
+사이트별 경험적 지식을 `~/claude-plugins/web-auto/skills/web-auto/patterns/{site}.md`에 관리한다.
+하나의 파일에 해당 사이트의 모든 지식을 통합:
+
+- **인증 방법** (로그인, 토큰 획득)
+- **API 엔드포인트** (URL, Method, 요청 형식)
+- **CSS 셀렉터** (페이지별 주요 요소)
+- **UI 워크플로우** (결제 플로우, 모달 조작 순서 등)
+- **Gotcha** (예상과 다른 동작, 필수 선행 조건)
 
 | 파일 | 용도 |
 |------|------|
-| `patterns/generic.md` | 일반 사이트 — 셀렉터 추출, API 발견, 가상스크롤 대응 |
-| `patterns/experdy.md` | Experdy — Firebase 토큰, API 호스트, 모달 조작 |
+| `patterns/generic.md` | 일반 사이트 — 기본 전략 |
+| `patterns/{site}.md` | 사이트별 패턴 — 새 사이트 발견 시 자동 생성 |
 
-**자동 기록**: 사용 중 예상과 다르게 동작하는 부분(gotcha)을 발견하면, 유저 요청 없이도 해당 사이트의 패턴 파일에 즉시 추가한다. 파일이 없으면 새로 생성.
+**사전 읽기**: 작업 시작 전, 대상 URL의 도메인/호스트에 해당하는 patterns 파일이 있으면 **반드시 먼저 읽고** 숙지한 후 자동화를 시작한다. localhost 사이트는 프로젝트명(예: `experdy.md`)으로 매칭한다.
+
+**자동 기록**: 사용 중 예상과 다르게 동작하는 부분(gotcha)을 발견하면, gotcha worker API에 즉시 POST한다. 세션 종료 시 Stop hook이 자동으로 patterns 파일에 flush한다.
+
+```bash
+# gotcha 발견 시 worker에 기록 (에러가 아닌 행동 패턴 gotcha도 포함)
+PORT=$(cat /tmp/web-auto-gotcha-worker.port 2>/dev/null)
+[ -n "$PORT" ] && curl -s -X POST "http://127.0.0.1:${PORT}/gotcha" \
+  -H "Content-Type: application/json" \
+  -d '{"site":"<site-name>","command":"click 수정","error":"인라인 편집 미지원 — 더보기 메뉴 경유 필요","timestamp":"2026-03-23 19:00"}'
+```
+
+기록 대상:
+- browser.ts 에러 (hook이 자동 캡처)
+- **예상과 다른 UI 동작** (클릭했는데 반응 없음, 모달이 예상과 다른 위치에 뜸 등)
+- **필수 선행 조건** (드롭다운 선택 필수, 저장 버튼 클릭 필수 등)
+- **페이지 자동 이동** (결제 후 스케줄 페이지로 이동 등)
+- **새로 발견한 API 엔드포인트나 셀렉터**
 
 ## CDP 사전 조건
 
@@ -59,7 +80,3 @@ pkill -9 "Google Chrome" && sleep 3
 ```
 
 확인: `curl -s http://localhost:9222/json/version`
-
-## 프로젝트별 nav-index
-
-`$NAV_INDEX_PATH` 환경변수 또는 `--nav-index` 옵션으로 프로젝트별 nav-index 지정.

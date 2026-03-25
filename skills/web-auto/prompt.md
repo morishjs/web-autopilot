@@ -98,8 +98,19 @@ iframe-site:
 - extract 결과는 JSON
 - screenshot 후 Read tool로 사용자에게 이미지 표시
 
+## 사전 읽기: patterns 파일
+
+작업 시작 전 대상 사이트의 patterns 파일을 읽는다. Glob은 프로젝트 외부 경로에서 실패하므로, Bash `ls`로 존재 확인 후 Read로 읽는다.
+
+```bash
+# 패턴 파일 경로 (~ = $HOME)
+ls ~/claude-plugins/web-auto/skills/web-auto/patterns/{site}.md
+```
+
+localhost 사이트는 `mevops.md` 또는 `experdy.md`로 매칭.
+
 ## Gotcha 자동 기록
 
 browser.ts 실패는 PostToolUse hook이 자동 감지하여 gotcha worker에 축적한다.
-세션 종료 시 Stop hook이 축적된 gotcha를 사이트별 패턴 파일(`patterns/{site}.md`)에 자동 기록한다.
+세션 종료 시 Stop hook이 축적된 gotcha를 사이트별 패턴 파일에 자동 기록한다.
 LLM이 별도 동작을 할 필요 없음 — 인프라가 처리함.
