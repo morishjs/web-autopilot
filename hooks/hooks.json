@@ -1,26 +1,13 @@
 {
-  "description": "Web-auto gotcha auto-capture hooks",
+  "description": "Web-auto v2: playbook-first browser automation",
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/patterns-preload.sh\"",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/playbook-match.sh\"",
             "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun \"${CLAUDE_PLUGIN_ROOT}/src/gotcha-worker.ts\" start",
-            "timeout": 10
           }
         ]
       }
@@ -31,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/gotcha-capture.sh\"",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/action-log.sh\"",
             "timeout": 5
           }
         ]
@@ -42,8 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/gotcha-flush.sh\"",
-            "timeout": 10
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/codegen-flush.sh\"",
+            "timeout": 30
           }
         ]
       }
